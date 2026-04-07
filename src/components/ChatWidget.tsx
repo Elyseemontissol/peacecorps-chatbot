@@ -966,19 +966,6 @@ export default function ChatWidget() {
 
             {/* Actions */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Support Ticket - Glowing */}
-              <a
-                href="/tickets"
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded text-white pc-glow-btn"
-                style={{ animationDuration: '2.5s' }}
-                aria-label="Open support ticket"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                Support
-              </a>
-
               {/* Talk to a Person (desktop) */}
               <button
                 type="button"

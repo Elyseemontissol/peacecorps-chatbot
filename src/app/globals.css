@@ -149,6 +149,23 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Arrow callout pop-in + bounce animation */
+@keyframes arrowPop {
+  0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+  15% { opacity: 1; transform: translateY(-8px) scale(1.05); }
+  25% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-12px); }
+  55% { transform: translateY(0); }
+  70% { transform: translateY(-8px); }
+  80% { transform: translateY(0); }
+  90% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+.pc-arrow-pop {
+  animation: arrowPop 2s ease-out forwards;
+}
+
 /* Glowing Support Button */
 @keyframes glowPulse {
   0%, 100% {

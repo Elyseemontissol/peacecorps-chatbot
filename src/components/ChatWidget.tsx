@@ -635,6 +635,7 @@ export default function ChatWidget() {
   const [escalationEmail, setEscalationEmail] = useState('');
   const [escalationReason, setEscalationReason] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showArrow, setShowArrow] = useState(false);
 
   // ---- Refs ----
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -645,10 +646,25 @@ export default function ChatWidget() {
   const t = UI[language];
   const isRtl = language === 'ar';
 
-  // ---- Init session + consent from storage ----
+  // ---- Init session + consent from storage + first-visit arrow ----
   useEffect(() => {
     setSessionId(getOrCreateSessionId());
     if (readConsent()) setShowConsent(false);
+
+    // Show arrow only on first visit
+    if (typeof window !== 'undefined') {
+      const seen = localStorage.getItem('pc-chat-arrow-seen');
+      if (!seen) {
+        // Pop in after a short delay
+        const showTimer = setTimeout(() => setShowArrow(true), 1500);
+        // Auto-hide after 8 seconds
+        const hideTimer = setTimeout(() => {
+          setShowArrow(false);
+          localStorage.setItem('pc-chat-arrow-seen', 'true');
+        }, 9500);
+        return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
+      }
+    }
   }, []);
 
   // ---- Create welcome message when consent accepted ----
@@ -918,9 +934,31 @@ export default function ChatWidget() {
       {/* Floating toggle button – shown when chat is CLOSED */}
       {!isOpen && (
         <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 99999 }}>
+          {/* Arrow callout – only shows on first visit, disappears after 8s or on click */}
+          {showArrow && (
+            <div
+              className="pc-arrow-pop"
+              style={{ position: 'absolute', bottom: 74, right: 0, pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+              aria-hidden="true"
+            >
+              <span style={{
+                background: '#cf4a31', color: 'white', fontSize: 14, fontWeight: 700,
+                padding: '8px 16px', borderRadius: 10, whiteSpace: 'nowrap',
+                boxShadow: '0 4px 16px rgba(207,74,49,0.45)',
+                letterSpacing: '0.01em',
+              }}>
+                Chat with us!
+              </span>
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ marginTop: -4 }}>
+                <path d="M22 6 L22 30" stroke="#cf4a31" strokeWidth="4.5" strokeLinecap="round" />
+                <path d="M12 22 L22 32 L32 22" stroke="#cf4a31" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          )}
+
           <button
             type="button"
-            onClick={() => setIsOpen(true)}
+            onClick={() => { setIsOpen(true); setShowArrow(false); }}
             className="group relative flex items-center justify-center w-16 h-16 rounded-full bg-[#1a2e5a] text-white shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#1a2e5a]/40 transition-all duration-200"
             aria-label={t.openChat}
             aria-haspopup="dialog"

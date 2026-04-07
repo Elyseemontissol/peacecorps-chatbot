@@ -1,4 +1,4 @@
-import { getDb } from './db';
+import { getDb, type KnowledgeDocument } from './db';
 
 export interface SearchResult {
   id: string;
@@ -35,23 +35,14 @@ export function searchKnowledgeBase(query: string, limit: number = 5): SearchRes
     .filter(t => t.length > 2 && !STOP_WORDS.has(t));
 
   if (queryTerms.length === 0) {
-    // Return top priority docs if no meaningful search terms
-    const rows = db.prepare(`
-      SELECT id, title, content, category, priority, source_url
-      FROM knowledge_documents
-      WHERE is_active = 1
-      ORDER BY priority DESC
-      LIMIT ?
-    `).all(limit) as SearchResult[];
-    return rows.map(r => ({ ...r, score: r.priority / 10 }));
+    const activeDocs = db.getActiveDocuments();
+    return activeDocs
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, limit)
+      .map(r => ({ id: r.id, title: r.title, content: r.content, category: r.category, priority: r.priority, source_url: r.source_url, score: r.priority / 10 }));
   }
 
-  // Get all active documents
-  const docs = db.prepare(`
-    SELECT id, title, content, category, priority, source_url, tags
-    FROM knowledge_documents
-    WHERE is_active = 1
-  `).all() as (SearchResult & { tags: string })[];
+  const docs = db.getActiveDocuments();
 
   // Score each document
   const scored = docs.map(doc => {

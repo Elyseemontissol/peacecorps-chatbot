@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "Peace Corps | Make the Most of Your World",
   description: "The Peace Corps is a volunteer program run by the United States government. Explore volunteer opportunities, learn about countries, and apply to serve abroad.",
   keywords: "Peace Corps, volunteer, international service, apply, countries, development",
+  icons: {
+    icon: '/peace-corps-logo.svg',
+    apple: '/peace-corps-logo.svg',
+  },
   openGraph: {
     title: "Peace Corps | Make the Most of Your World",
     description: "Volunteer with the Peace Corps and make a lasting difference while gaining skills that last a lifetime.",

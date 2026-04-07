@@ -477,7 +477,7 @@ export default function TicketsPage() {
           <div className="flex items-center gap-4 text-xs text-zinc-600">
             <span>754-802-5327</span>
             <span>Info@MontissolGlobalTechnology.com</span>
-            <span>CAGE: 9TKS0</span>
+            <span>CAGE: 11A92</span>
           </div>
         </div>
       </footer>

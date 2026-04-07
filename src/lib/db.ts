@@ -70,6 +70,31 @@ export interface FeedbackEntry {
   created_at: string;
 }
 
+export interface Ticket {
+  id: string;
+  ticket_number: string;
+  subject: string;
+  description: string;
+  category: 'bug' | 'feature' | 'performance' | 'security' | 'integration' | 'billing' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'waiting' | 'resolved' | 'closed';
+  submitter_name: string;
+  submitter_email: string;
+  submitter_org: string;
+  assigned_to: string | null;
+  responses: TicketResponse[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TicketResponse {
+  id: string;
+  author: string;
+  author_role: 'client' | 'support' | 'engineer';
+  content: string;
+  created_at: string;
+}
+
 interface Store {
   knowledge_documents: KnowledgeDocument[];
   conversations: Conversation[];
@@ -77,6 +102,7 @@ interface Store {
   analytics_events: AnalyticsEvent[];
   agent_queue: AgentQueueEntry[];
   feedback: FeedbackEntry[];
+  tickets: Ticket[];
 }
 
 let store: Store | null = null;
@@ -96,8 +122,10 @@ function getStore(): Store {
       analytics_events: [],
       agent_queue: [],
       feedback: [],
+      tickets: [],
     };
     seedKnowledgeBase(store);
+    seedTickets(store);
   }
   return store;
 }
@@ -284,6 +312,55 @@ export function getDb() {
         created_at: now(),
       });
     },
+
+    // Tickets
+    getAllTickets(opts?: { status?: string; priority?: string; search?: string }) {
+      let tickets = [...s.tickets];
+      if (opts?.status && opts.status !== 'all') tickets = tickets.filter(t => t.status === opts.status);
+      if (opts?.priority && opts.priority !== 'all') tickets = tickets.filter(t => t.priority === opts.priority);
+      if (opts?.search) {
+        const q = opts.search.toLowerCase();
+        tickets = tickets.filter(t =>
+          t.subject.toLowerCase().includes(q) ||
+          t.ticket_number.toLowerCase().includes(q) ||
+          t.submitter_name.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q)
+        );
+      }
+      return tickets.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    },
+
+    getTicket(id: string) {
+      return s.tickets.find(t => t.id === id) || null;
+    },
+
+    getTicketByNumber(num: string) {
+      return s.tickets.find(t => t.ticket_number === num) || null;
+    },
+
+    insertTicket(ticket: Omit<Ticket, 'responses' | 'created_at' | 'updated_at'>) {
+      s.tickets.push({ ...ticket, responses: [], created_at: now(), updated_at: now() });
+    },
+
+    updateTicket(id: string, fields: Partial<Ticket>) {
+      const idx = s.tickets.findIndex(t => t.id === id);
+      if (idx >= 0) {
+        s.tickets[idx] = { ...s.tickets[idx], ...fields, updated_at: now() };
+      }
+    },
+
+    addTicketResponse(ticketId: string, response: TicketResponse) {
+      const idx = s.tickets.findIndex(t => t.id === ticketId);
+      if (idx >= 0) {
+        s.tickets[idx].responses.push(response);
+        s.tickets[idx].updated_at = now();
+      }
+    },
+
+    getNextTicketNumber() {
+      const count = s.tickets.length;
+      return `ME-${String(count + 1001).padStart(4, '0')}`;
+    },
   };
 }
 
@@ -375,4 +452,78 @@ function seedKnowledgeBase(s: Store) {
       updated_at: now(),
     });
   }
+}
+
+function seedTickets(s: Store) {
+  const tickets: Ticket[] = [
+    {
+      id: 'tkt-001', ticket_number: 'ME-1001', subject: 'Chatbot not responding in Spanish on mobile',
+      description: 'When selecting Spanish (Español) on mobile Safari, the chatbot shows the welcome message in Spanish but subsequent responses come back in English. This only happens on iOS devices. Desktop Chrome works fine.',
+      category: 'bug', priority: 'high', status: 'in_progress',
+      submitter_name: 'Sarah Chen', submitter_email: 's.chen@peacecorps.gov', submitter_org: 'Peace Corps VRS',
+      assigned_to: 'Marcus Johnson',
+      responses: [
+        { id: 'r-001', author: 'Marcus Johnson', author_role: 'engineer', content: 'Looking into this. It appears the language header is not being preserved across API calls on mobile Safari due to a cookie issue. Working on a fix.', created_at: '2026-04-05 14:30:00' },
+        { id: 'r-002', author: 'Sarah Chen', author_role: 'client', content: 'Thanks Marcus. This is affecting our recruitment events this week so it\'s urgent. About 30% of our event attendees use mobile.', created_at: '2026-04-05 15:10:00' },
+        { id: 'r-003', author: 'Marcus Johnson', author_role: 'engineer', content: 'Fix deployed to staging. The issue was that sessionStorage was being used instead of localStorage for language preference on iOS. Can you test on your device?', created_at: '2026-04-06 09:15:00' },
+      ],
+      created_at: '2026-04-04 10:22:00', updated_at: '2026-04-06 09:15:00',
+    },
+    {
+      id: 'tkt-002', ticket_number: 'ME-1002', subject: 'Add Knowledge Base article for Peace Corps Response deadlines',
+      description: 'We need to add current PCR application deadlines to the RAG dataset. The chatbot currently cannot answer questions about Response program deadlines. Please add the Q3 and Q4 2026 deadlines.',
+      category: 'feature', priority: 'medium', status: 'open',
+      submitter_name: 'David Okafor', submitter_email: 'd.okafor@peacecorps.gov', submitter_org: 'Peace Corps VRS',
+      assigned_to: null,
+      responses: [],
+      created_at: '2026-04-06 08:45:00', updated_at: '2026-04-06 08:45:00',
+    },
+    {
+      id: 'tkt-003', ticket_number: 'ME-1003', subject: 'KPI Dashboard showing incorrect containment rate',
+      description: 'The containment rate on the admin dashboard is showing 100% but we know at least 12 conversations were escalated to live agents last week. The escalation count shows correctly but the rate calculation seems wrong.',
+      category: 'bug', priority: 'medium', status: 'waiting',
+      submitter_name: 'Lisa Park', submitter_email: 'l.park@peacecorps.gov', submitter_org: 'Peace Corps OCIO',
+      assigned_to: 'Aisha Williams',
+      responses: [
+        { id: 'r-004', author: 'Aisha Williams', author_role: 'engineer', content: 'I\'ve identified the issue. The analytics query is using the wrong date filter which excludes escalated conversations from the previous period. Fix is ready for review.', created_at: '2026-04-05 16:00:00' },
+        { id: 'r-005', author: 'Aisha Williams', author_role: 'engineer', content: 'Can you confirm what date range you\'re looking at? I want to make sure the fix covers your use case.', created_at: '2026-04-05 16:30:00' },
+      ],
+      created_at: '2026-04-03 14:10:00', updated_at: '2026-04-05 16:30:00',
+    },
+    {
+      id: 'tkt-004', ticket_number: 'ME-1004', subject: 'Request: Integration with Salesforce CRM',
+      description: 'VRS would like the chatbot to integrate with our Salesforce CRM so that when a user provides their email during a conversation, it automatically creates or updates a lead record. This is critical for our recruitment pipeline tracking.',
+      category: 'integration', priority: 'high', status: 'open',
+      submitter_name: 'James Rivera', submitter_email: 'j.rivera@peacecorps.gov', submitter_org: 'Peace Corps VRS',
+      assigned_to: null,
+      responses: [
+        { id: 'r-006', author: 'Montissol Global Tech Support', author_role: 'support', content: 'Thank you for this request, James. We\'ve added this to our integration roadmap. We\'ll schedule a discovery call to map out the Salesforce fields and workflow. Is the CRM team available this week?', created_at: '2026-04-06 10:00:00' },
+      ],
+      created_at: '2026-04-05 11:30:00', updated_at: '2026-04-06 10:00:00',
+    },
+    {
+      id: 'tkt-005', ticket_number: 'ME-1005', subject: 'Chatbot response latency spike during peak hours',
+      description: 'We\'re seeing response times of 8-12 seconds during Monday mornings (peak traffic). Normal response time is under 2 seconds. This is affecting user experience. Our traffic peaks at ~50K users on Mondays.',
+      category: 'performance', priority: 'critical', status: 'in_progress',
+      submitter_name: 'Sarah Chen', submitter_email: 's.chen@peacecorps.gov', submitter_org: 'Peace Corps VRS',
+      assigned_to: 'Marcus Johnson',
+      responses: [
+        { id: 'r-007', author: 'Marcus Johnson', author_role: 'engineer', content: 'Investigating. Initial analysis shows the RAG search is the bottleneck under high concurrency. The vector similarity search scales linearly with document count. Looking at caching options.', created_at: '2026-04-06 11:00:00' },
+        { id: 'r-008', author: 'Marcus Johnson', author_role: 'engineer', content: 'Implemented a response cache for the top 50 most common queries. Also added connection pooling. Deploying to production now. Should see improvement within the hour.', created_at: '2026-04-06 14:30:00' },
+        { id: 'r-009', author: 'Sarah Chen', author_role: 'client', content: 'Response times are back to normal. Thanks for the quick turnaround!', created_at: '2026-04-07 09:00:00' },
+      ],
+      created_at: '2026-04-06 08:15:00', updated_at: '2026-04-07 09:00:00',
+    },
+    {
+      id: 'tkt-006', ticket_number: 'ME-1006', subject: 'Section 508 accessibility audit findings',
+      description: 'Our accessibility team found 3 issues during their quarterly audit:\n1. Chat input field missing visible focus indicator in high contrast mode\n2. Typing indicator dots not announced to screen readers\n3. Language selector dropdown not keyboard navigable with arrow keys\n\nThese need to be resolved before our next compliance review on April 30.',
+      category: 'bug', priority: 'high', status: 'open',
+      submitter_name: 'Monica Tran', submitter_email: 'm.tran@peacecorps.gov', submitter_org: 'Peace Corps OCIO',
+      assigned_to: null,
+      responses: [],
+      created_at: '2026-04-07 07:30:00', updated_at: '2026-04-07 07:30:00',
+    },
+  ];
+
+  s.tickets = tickets;
 }

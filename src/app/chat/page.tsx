@@ -5,12 +5,29 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'agent';
   content: string;
   sources?: { title: string; url?: string }[];
   isEmergency?: boolean;
   timestamp: Date;
+  agentName?: string;
 }
+
+type ChatMode = 'ai' | 'agent';
+
+const AGENTS = [
+  { name: 'Sarah Mitchell', title: 'Peace Corps Recruiter', region: 'West Coast', avatar: 'SM' },
+  { name: 'James Okafor', title: 'Returned Volunteer Advisor', region: 'East Coast', avatar: 'JO' },
+  { name: 'Maria Santos', title: 'Peace Corps Recruiter', region: 'Southwest', avatar: 'MS' },
+  { name: 'David Chen', title: 'Application Specialist', region: 'Midwest', avatar: 'DC' },
+];
+
+const AGENT_GREETINGS = [
+  (name: string) => `Hey there! This is ${name}. Thanks for reaching out — I'd love to help you learn more about the Peace Corps. What's on your mind?`,
+  (name: string) => `Hi! ${name} here. I'm really glad you want to chat. Whether you're just curious or ready to apply, I'm here for you. What can I help with?`,
+  (name: string) => `Hello! You've been connected with ${name}. I've helped dozens of people through the Peace Corps journey and I'd be happy to help you too. What questions do you have?`,
+  (name: string) => `Hey! I'm ${name}. Welcome! I actually served as a Volunteer myself, so I know firsthand what this experience is like. How can I help you today?`,
+];
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,6 +35,9 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => uuidv4());
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [chatMode, setChatMode] = useState<ChatMode>('ai');
+  const [agent, setAgent] = useState<typeof AGENTS[0] | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,6 +53,37 @@ export default function ChatPage() {
     inputRef.current?.focus();
   }, []);
 
+  const connectToAgent = useCallback(() => {
+    if (isConnecting || chatMode === 'agent') return;
+    setIsConnecting(true);
+
+    // Pick a random agent
+    const selectedAgent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+    setAgent(selectedAgent);
+
+    // Add a "connecting" system message
+    setMessages(prev => [...prev, {
+      id: uuidv4(),
+      role: 'assistant',
+      content: `Connecting you with a Peace Corps recruiter... one moment please.`,
+      timestamp: new Date(),
+    }]);
+
+    // Simulate connection delay then agent greeting
+    setTimeout(() => {
+      setChatMode('agent');
+      setIsConnecting(false);
+      const greeting = AGENT_GREETINGS[Math.floor(Math.random() * AGENT_GREETINGS.length)];
+      setMessages(prev => [...prev, {
+        id: uuidv4(),
+        role: 'agent',
+        content: greeting(selectedAgent.name),
+        agentName: selectedAgent.name,
+        timestamp: new Date(),
+      }]);
+    }, 2000);
+  }, [isConnecting, chatMode]);
+
   const quickReplies = [
     'How do I apply?',
     'Where can I serve?',
@@ -41,6 +92,42 @@ export default function ChatPage() {
     'Talk to a recruiter',
     'Am I eligible?',
   ];
+
+  const AGENT_RESPONSES: Record<string, string[]> = {
+    apply: [
+      "Great question! The application process has a few steps: you'll create an account on peacecorps.gov, fill out the application, and then we'll review it. The whole thing takes about an hour. Want me to walk you through any specific part?",
+      "Applying is pretty straightforward! Head to peacecorps.gov/apply to get started. You'll need your resume, a personal statement, and two references. I'm happy to help if you get stuck on anything.",
+    ],
+    serve: [
+      "We currently have Volunteers in 56 countries across Africa, Asia, the Caribbean, Central and South America, Europe, and the Pacific Islands. Is there a particular region you're drawn to?",
+      "There are so many amazing places to serve! It really depends on your skills and what sector you're interested in. Do you have a preference between education, health, agriculture, or community development?",
+    ],
+    benefit: [
+      "The benefits are honestly really solid. You get a living allowance, free housing, full medical and dental coverage, student loan deferment, and a readjustment allowance of about $10,000 when you complete service. Plus, you get non-competitive eligibility for federal jobs for a year after.",
+      "There's a lot to love. Beyond the life-changing experience, you get language training, a monthly stipend, health coverage, and a nice transition allowance when you finish. Many RPCVs say the professional network alone was worth it.",
+    ],
+    eligible: [
+      "The main requirements are that you need to be a U.S. citizen, at least 18 years old, and in good health. There's no upper age limit — we've had Volunteers in their 80s! A bachelor's degree or equivalent work experience is typically needed. Any specific concerns about your eligibility?",
+      "Good news — the requirements are more accessible than most people think. U.S. citizenship, 18+, and generally good health. Most positions want a bachelor's degree, but relevant work experience can sometimes substitute. What's your background?",
+    ],
+    default: [
+      "That's a really good question. Let me look into the specifics for you. In the meantime, would it be helpful if I sent you some resources by email?",
+      "I want to make sure I give you the most accurate answer on that. Can you tell me a little more about your situation so I can point you in the right direction?",
+      "Absolutely, I can help with that. Let me share what I know, and if you need more detail, we can always set up a longer call.",
+    ],
+  };
+
+  const getAgentResponse = (text: string): string => {
+    const lower = text.toLowerCase();
+    let category = 'default';
+    if (lower.includes('apply') || lower.includes('application')) category = 'apply';
+    else if (lower.includes('where') || lower.includes('country') || lower.includes('serve')) category = 'serve';
+    else if (lower.includes('benefit') || lower.includes('pay') || lower.includes('salary') || lower.includes('stipend')) category = 'benefit';
+    else if (lower.includes('eligible') || lower.includes('eligib') || lower.includes('require') || lower.includes('qualify')) category = 'eligible';
+
+    const responses = AGENT_RESPONSES[category];
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -56,6 +143,23 @@ export default function ChatPage() {
     setInput('');
     setIsLoading(true);
 
+    // Agent mode — simulate live agent responses
+    if (chatMode === 'agent' && agent) {
+      const delay = 1500 + Math.random() * 2000; // 1.5-3.5s realistic typing delay
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: uuidv4(),
+          role: 'agent',
+          content: getAgentResponse(text),
+          agentName: agent.name,
+          timestamp: new Date(),
+        }]);
+        setIsLoading(false);
+      }, delay);
+      return;
+    }
+
+    // AI mode
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -94,7 +198,7 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, conversationId, sessionId]);
+  }, [isLoading, conversationId, sessionId, chatMode, agent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -123,12 +227,20 @@ export default function ChatPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="/connect" className="text-sm text-white/70 hover:text-white transition flex items-center gap-1.5" title="Talk to a Person">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <button
+                onClick={connectToAgent}
+                disabled={chatMode === 'agent' || isConnecting}
+                className={`text-sm font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${
+                  chatMode === 'agent'
+                    ? 'bg-green-500 text-white cursor-default'
+                    : 'pc-glow-btn text-white cursor-pointer'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
-                Talk to a Person
-              </a>
+                {chatMode === 'agent' ? `Connected: ${agent?.name}` : isConnecting ? 'Connecting...' : 'Talk to a Person'}
+              </button>
               <span className="w-px h-4 bg-white/20" />
               <a href="/" className="text-sm text-white/70 hover:text-white transition flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -175,6 +287,7 @@ export default function ChatPage() {
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] ${msg.role === 'user' ? '' : 'flex gap-3'}`}>
+                    {/* AI assistant avatar */}
                     {msg.role === 'assistant' && (
                       <div className="w-8 h-8 rounded-full bg-[#1a2e5a] flex items-center justify-center shrink-0 mt-1">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -182,11 +295,23 @@ export default function ChatPage() {
                         </svg>
                       </div>
                     )}
+                    {/* Live agent avatar */}
+                    {msg.role === 'agent' && (
+                      <div className="w-8 h-8 rounded-full bg-[#cf4a31] flex items-center justify-center shrink-0 mt-1">
+                        <span className="text-white text-[10px] font-bold">{msg.agentName?.split(' ').map(n => n[0]).join('')}</span>
+                      </div>
+                    )}
                     <div>
+                      {/* Agent name label */}
+                      {msg.role === 'agent' && msg.agentName && (
+                        <p className="text-[11px] text-[#cf4a31] font-semibold mb-1">{msg.agentName}</p>
+                      )}
                       <div
                         className={`rounded-2xl px-4 py-3 ${
                           msg.role === 'user'
                             ? 'bg-[#1a2e5a] text-white rounded-br-md'
+                            : msg.role === 'agent'
+                            ? 'bg-[#fff8f6] border border-[#cf4a31]/20 text-gray-800 rounded-bl-md shadow-sm'
                             : msg.isEmergency
                             ? 'bg-red-50 border border-red-200 text-red-900 rounded-bl-md'
                             : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md shadow-sm'

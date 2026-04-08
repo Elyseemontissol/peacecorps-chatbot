@@ -215,7 +215,7 @@ export default function ChatPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <a href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-                <img src="/peace-corps-logo.svg" alt="Peace Corps" className="w-8 h-8 brightness-0 invert" />
+                <img src="/peace-corps-logo.svg" alt="Peace Corps" className="w-8 h-8" />
                 <span className="text-lg font-bold" style={{ fontFamily: 'Merriweather, serif' }}>Peace Corps</span>
               </a>
               <span className="text-white/40 mx-2">|</span>

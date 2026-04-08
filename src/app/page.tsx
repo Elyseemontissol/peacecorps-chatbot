@@ -10,6 +10,15 @@ export default function Home() {
 
   const NAV_ITEMS = [
     {
+      label: 'What We Do',
+      href: '/what-we-do',
+      children: [
+        { label: 'Where We Serve', href: '/what-we-do/where-we-serve/' },
+        { label: 'Our Impact', href: '/what-we-do/our-impact/' },
+        { label: 'Tech Corps', href: '/what-we-do/tech-corps/' },
+      ],
+    },
+    {
       label: 'Ways to Serve',
       href: '/ways-to-serve',
       children: [
@@ -20,24 +29,23 @@ export default function Home() {
       ],
     },
     {
-      label: 'What We Do',
-      href: '/what-we-do',
+      label: 'How to Apply',
+      href: '/how-to-apply',
       children: [
-        { label: 'Where We Serve', href: '/what-we-do/where-we-serve/' },
-        { label: 'Our Impact', href: '/what-we-do/our-impact/' },
-        { label: 'Tech Corps', href: '/what-we-do/tech-corps/' },
+        { label: 'Application Process', href: '/how-to-apply/application-process/' },
+        { label: 'Eligibility', href: '/how-to-apply/eligibility/' },
+        { label: 'Medical & Legal', href: '/how-to-apply/medical-legal/' },
+        { label: 'FAQs', href: '/how-to-apply/faqs/' },
       ],
     },
-    {
-      label: 'About the Agency',
-      href: '/about-the-agency',
-      children: [
-        { label: 'Leadership', href: '/about-the-agency/leadership/' },
-        { label: 'News', href: '/about-the-agency/media-center/news/' },
-        { label: 'Contact Us', href: '/about-the-agency/contact-us/' },
-        { label: 'Budget & Performance', href: '/about-the-agency/policies-and-publications/budget-and-performance/' },
-      ],
-    },
+  ];
+
+  const SECONDARY_NAV = [
+    { label: 'About the Agency', href: '/about-the-agency' },
+    { label: 'Media Center', href: '/media-center' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'FAQs', href: '/faqs' },
+    { label: 'Donate', href: '/donate' },
   ];
 
   return (
@@ -73,27 +81,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== Header ===== */}
-      <header className="bg-white sticky top-0 z-50 shadow-sm">
-        {/* Top thin red/blue stripe */}
-        <div className="h-1 bg-gradient-to-r from-[#1a2e5a] via-[#1a2e5a] to-[#cf4a31]" />
-
+      {/* ===== Secondary Navigation ===== */}
+      <nav className="bg-[#0f1d3d] text-white" aria-label="Secondary navigation">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-between h-[72px]">
+          <div className="flex items-center justify-between h-10">
+            <div className="hidden md:flex items-center gap-5">
+              {SECONDARY_NAV.map((item) => (
+                <a key={item.label} href={item.href} className="text-[13px] text-gray-300 hover:text-white transition-colors">
+                  {item.label}
+                </a>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 ml-auto">
+              <a href="/returned-volunteers" className="text-[13px] text-gray-300 hover:text-white transition-colors">
+                Info for <span className="underline font-semibold text-white">Returned Volunteers</span> and <strong>more</strong>
+                <svg className="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </a>
+              <span className="hidden md:block w-px h-5 bg-gray-600" />
+              <button className="flex items-center gap-1.5 text-[13px] text-gray-300 hover:text-white transition-colors" aria-label="Search">
+                <span className="hidden md:inline font-semibold text-white">Search</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* ===== Main Header ===== */}
+      <header className="bg-white sticky top-0 z-50 shadow-sm">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
+          <div className="flex items-center justify-between h-[80px]">
             {/* Logo */}
             <a href="/" className="flex items-center gap-3 shrink-0">
-              <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-2 border-[#1a2e5a] flex items-center justify-center">
-                  <svg viewBox="0 0 40 40" className="w-7 h-7 text-[#cf4a31]" fill="currentColor">
-                    <path d="M20 6c-1 0-2 .5-3 1.5C14 10 8 14 8 22c0 5 3 8 6 10l2-3c-2-1-4-4-4-7 0-5 4-8 8-12 4 4 8 7 8 12 0 3-2 6-4 7l2 3c3-2 6-5 6-10 0-8-6-12-9-14.5-1-1-2-1.5-3-1.5z"/>
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <div className="text-[22px] font-bold text-[#1a2e5a] leading-tight tracking-tight" style={{ fontFamily: 'Merriweather, serif' }}>
-                  Peace Corps
-                </div>
-              </div>
+              <img src="/peace-corps-logo.svg" alt="Peace Corps" className="w-10 h-10" />
+              <span className="text-[22px] font-bold text-[#1a2e5a] leading-tight tracking-tight" style={{ fontFamily: 'Merriweather, serif' }}>
+                Peace Corps
+              </span>
             </a>
 
             {/* Desktop Nav */}
@@ -105,23 +130,20 @@ export default function Home() {
                   onMouseEnter={() => setActiveDropdown(item.label)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <a
-                    href={item.href}
-                    className={`px-4 py-2 text-[15px] font-semibold rounded-md transition-colors ${
-                      activeDropdown === item.label ? 'text-[#cf4a31] bg-gray-50' : 'text-[#1a2e5a] hover:text-[#cf4a31]'
+                  <button
+                    className={`px-4 py-2 text-[15px] font-semibold transition-colors flex items-center gap-1 ${
+                      activeDropdown === item.label ? 'text-[#1a2e5a]' : 'text-[#333] hover:text-[#1a2e5a]'
                     }`}
                   >
                     {item.label}
-                    {item.children && (
-                      <svg className="inline w-3 h-3 ml-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </a>
+                    <svg className={`w-3.5 h-3.5 transition-transform ${activeDropdown === item.label ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
                   {item.children && activeDropdown === item.label && (
                     <div className="absolute top-full left-0 mt-0 py-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
                       {item.children.map((child) => (
-                        <a key={child.label} href={child.href} className="block px-4 py-2.5 text-sm text-[#1a2e5a] hover:bg-[#f0f0f0] hover:text-[#cf4a31] transition-colors">
+                        <a key={child.label} href={child.href} className="block px-4 py-2.5 text-sm text-[#333] hover:bg-[#f0f0f0] hover:text-[#1a2e5a] transition-colors">
                           {child.label}
                         </a>
                       ))}
@@ -132,25 +154,12 @@ export default function Home() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              {/* Search */}
-              <button className="w-10 h-10 rounded-full flex items-center justify-center text-[#1a2e5a] hover:bg-gray-100 transition" aria-label="Search">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-
-              {/* Support Button - Glowing */}
-              <a href="/tickets" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm text-white transition-all pc-glow-btn">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                Support
+            <div className="flex items-center gap-3">
+              <a href="/connect" className="hidden sm:inline-flex items-center justify-center bg-[#1a2e5a] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#0f1d3d] transition-colors">
+                Connect
               </a>
-
-              {/* Serve Button */}
-              <a href="/ways-to-serve" className="hidden sm:inline-block bg-[#cf4a31] text-white px-6 py-2.5 rounded-md font-bold text-sm hover:bg-[#b5382a] transition-colors shadow-sm">
-                Serve with Us
+              <a href="/ways-to-serve" className="hidden sm:inline-flex items-center justify-center border-2 border-[#1a2e5a] text-[#1a2e5a] px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#1a2e5a] hover:text-white transition-colors">
+                Apply
               </a>
 
               {/* Mobile Menu */}
@@ -178,18 +187,15 @@ export default function Home() {
                   {item.children && (
                     <div className="pl-6 space-y-0.5">
                       {item.children.map((child) => (
-                        <a key={child.label} href={child.href} className="block py-1.5 px-3 text-sm text-gray-600 hover:text-[#cf4a31]">{child.label}</a>
+                        <a key={child.label} href={child.href} className="block py-1.5 px-3 text-sm text-gray-600 hover:text-[#1a2e5a]">{child.label}</a>
                       ))}
                     </div>
                   )}
                 </div>
               ))}
               <div className="pt-3 px-3 space-y-2">
-                <a href="/tickets" className="flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-sm text-white pc-glow-btn">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                  Support
-                </a>
-                <a href="/ways-to-serve" className="block text-center bg-[#cf4a31] text-white py-2.5 rounded-md font-bold hover:bg-[#b5382a]">Serve with Us</a>
+                <a href="/connect" className="block text-center bg-[#1a2e5a] text-white py-2.5 rounded-full font-bold hover:bg-[#0f1d3d]">Connect</a>
+                <a href="/ways-to-serve" className="block text-center border-2 border-[#1a2e5a] text-[#1a2e5a] py-2.5 rounded-full font-bold hover:bg-[#1a2e5a] hover:text-white">Apply</a>
               </div>
             </div>
           )}
@@ -198,54 +204,117 @@ export default function Home() {
 
       {/* ===== Main Content ===== */}
       <main id="main-content">
-        {/* Hero */}
-        <section className="relative min-h-[560px] md:min-h-[640px] flex items-center overflow-hidden">
+        {/* Hero - "Serve Today" */}
+        <section className="relative min-h-[600px] md:min-h-[700px] flex items-center overflow-hidden bg-[#0f1d3d]">
+          {/* Background sunset image */}
           <img
-            src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1920&q=80"
-            alt="Peace Corps Volunteers working with community members abroad"
-            className="absolute inset-0 w-full h-full object-cover"
+            src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1920&q=80"
+            alt="Two people watching sunset on a hilltop"
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1d3d]/90 via-[#1a2e5a]/75 to-transparent" />
-          <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 py-20">
-            <div className="max-w-xl">
-              <p className="text-[#f9a825] font-semibold text-sm uppercase tracking-widest mb-4">Make a Difference</p>
-              <h1 className="text-4xl md:text-[52px] font-bold text-white leading-[1.1] mb-6" style={{ fontFamily: 'Merriweather, serif' }}>
-                Make the Most<br />of Your World
-              </h1>
-              <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
-                Volunteer with the Peace Corps and create lasting change while gaining the experience of a lifetime.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a href="/ways-to-serve" className="inline-flex items-center justify-center bg-[#cf4a31] text-white px-8 py-3.5 rounded-md font-bold text-base hover:bg-[#b5382a] transition-all shadow-lg hover:shadow-xl">
-                  Serve with Us
-                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </a>
-                <a href="/what-we-do" className="inline-flex items-center justify-center border-2 border-white/80 text-white px-8 py-3.5 rounded-md font-bold text-base hover:bg-white hover:text-[#1a2e5a] transition-all">
-                  Learn More
-                </a>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1d3d]/95 via-[#0f1d3d]/70 to-[#0f1d3d]/40" />
+
+          <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 py-16 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left - Big text */}
+              <div>
+                <h1 className="text-[80px] md:text-[120px] lg:text-[140px] font-black leading-[0.85] tracking-tight" style={{ fontFamily: 'Source Sans 3, sans-serif' }}>
+                  <span className="text-white block">Serve</span>
+                  <span className="text-[#5b8dd9] block">Today</span>
+                </h1>
               </div>
+
+              {/* Right - Description */}
+              <div className="lg:pl-8">
+                <p className="text-white/90 text-lg md:text-xl leading-relaxed max-w-md mb-8">
+                  Peace Corps Volunteers put their purpose, passion, and skills to work in partnership with host communities in 60+ countries.
+                </p>
+                <div className="flex flex-wrap gap-6">
+                  <a href="/what-we-do" className="text-white font-semibold text-base hover:underline inline-flex items-center gap-1">
+                    Our mission
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </a>
+                  <a href="/ways-to-serve/service-assignments/browse-opportunities/" className="text-white font-semibold text-base hover:underline inline-flex items-center gap-1">
+                    Browse opportunities
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="absolute bottom-8 left-8">
+              <svg className="w-6 h-6 text-white/60 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </div>
           </div>
         </section>
 
-        {/* Quick Links Bar */}
-        <section className="bg-white border-b">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-200">
-              {[
-                { icon: '🌍', label: 'Where We Serve', sub: '56+ countries worldwide', href: '/what-we-do/where-we-serve/' },
-                { icon: '📋', label: 'Browse Opportunities', sub: 'Find your assignment', href: '/ways-to-serve/service-assignments/browse-opportunities/' },
-                { icon: '📞', label: 'Contact a Recruiter', sub: 'Get your questions answered', href: '/about-the-agency/contact-us/' },
-                { icon: '📰', label: 'Latest News', sub: 'Agency updates & stories', href: '/about-the-agency/media-center/news/' },
-              ].map((link) => (
-                <a key={link.label} href={link.href} className="flex items-center gap-3 px-5 py-5 hover:bg-[#f0f0f0] transition group">
-                  <span className="text-2xl">{link.icon}</span>
-                  <div>
-                    <div className="text-sm font-semibold text-[#1a2e5a] group-hover:text-[#cf4a31] transition-colors">{link.label}</div>
-                    <div className="text-xs text-gray-500">{link.sub}</div>
+        {/* ===== Take the Next Step - Red CTA Bar ===== */}
+        <section className="bg-[#b5261e] relative overflow-hidden">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-5">
+              {/* "Take the next step" label */}
+              <div className="md:col-span-1 flex items-center px-8 py-8 md:py-12 md:border-r border-white/20">
+                <h2 className="text-white text-2xl md:text-[26px] font-bold leading-tight" style={{ fontFamily: 'Merriweather, serif' }}>
+                  Take the next step.
+                </h2>
+              </div>
+
+              {/* Connect */}
+              <a href="/connect" className="group flex items-center px-8 py-8 md:py-12 hover:bg-[#9a1f18] transition-colors border-t md:border-t-0 md:border-r border-white/20">
+                <div>
+                  <div className="text-white text-xl md:text-2xl font-bold" style={{ fontFamily: 'Source Sans 3, sans-serif' }}>Connect</div>
+                  <div className="text-white/80 text-sm mt-0.5 inline-flex items-center gap-1">
+                    with a recruiter
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </div>
-                </a>
-              ))}
+                </div>
+              </a>
+
+              {/* Attend */}
+              <a href="/events" className="group relative flex items-center px-8 py-8 md:py-12 hover:bg-[#9a1f18] transition-colors border-t md:border-t-0 md:border-r border-white/20 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=60"
+                  alt="Community event"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+                <div className="relative z-10">
+                  <div className="text-white text-xl md:text-2xl font-bold" style={{ fontFamily: 'Source Sans 3, sans-serif' }}>Attend</div>
+                  <div className="text-white/80 text-sm mt-0.5 inline-flex items-center gap-1">
+                    an event
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </div>
+                </div>
+              </a>
+
+              {/* Learn */}
+              <a href="/how-to-apply" className="group flex items-center px-8 py-8 md:py-12 hover:bg-[#9a1f18] transition-colors border-t md:border-t-0 md:border-r border-white/20">
+                <div>
+                  <div className="text-white text-xl md:text-2xl font-bold" style={{ fontFamily: 'Source Sans 3, sans-serif' }}>Learn</div>
+                  <div className="text-white/80 text-sm mt-0.5 inline-flex items-center gap-1">
+                    how to apply
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </div>
+                </div>
+              </a>
+
+              {/* AI Chatbot */}
+              <a href="/chat" className="group flex items-center px-8 py-8 md:py-12 hover:bg-[#9a1f18] transition-colors border-t md:border-t-0 bg-[#a02119]">
+                <div>
+                  <div className="text-white text-xl md:text-2xl font-bold inline-flex items-center gap-2" style={{ fontFamily: 'Source Sans 3, sans-serif' }}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                    </svg>
+                    AI Chat
+                  </div>
+                  <div className="text-white/80 text-sm mt-0.5 inline-flex items-center gap-1">
+                    ask us anything
+                    <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </div>
+                </div>
+              </a>
             </div>
           </div>
         </section>
@@ -259,7 +328,7 @@ export default function Home() {
                 Find Your Path to Service
               </h2>
               <p className="text-gray-600 mt-4 max-w-2xl mx-auto text-lg">
-                Whether you want to serve abroad, respond to urgent needs, or volunteer from home — there&rsquo;s a program for you.
+                Whether you want to serve abroad, respond to urgent needs, or volunteer from home &mdash; there&rsquo;s a program for you.
               </p>
             </div>
 
@@ -328,7 +397,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stories */}
+        {/* Volunteer Stories */}
         <section className="py-20 bg-white">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
             <div className="flex items-end justify-between mb-12">
@@ -413,7 +482,7 @@ export default function Home() {
         <div className="bg-[#1a2e5a]">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
             <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-full py-3 text-sm font-medium text-white/80 hover:text-white transition text-center">
-              Return to top ↑
+              Return to top
             </button>
           </div>
         </div>
@@ -423,11 +492,7 @@ export default function Home() {
             {/* Logo */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full border-2 border-white/30 flex items-center justify-center">
-                  <svg viewBox="0 0 40 40" className="w-6 h-6 text-[#cf4a31]" fill="currentColor">
-                    <path d="M20 6c-1 0-2 .5-3 1.5C14 10 8 14 8 22c0 5 3 8 6 10l2-3c-2-1-4-4-4-7 0-5 4-8 8-12 4 4 8 7 8 12 0 3-2 6-4 7l2 3c3-2 6-5 6-10 0-8-6-12-9-14.5-1-1-2-1.5-3-1.5z"/>
-                  </svg>
-                </div>
+                <img src="/peace-corps-logo.svg" alt="Peace Corps" className="w-10 h-10 brightness-0 invert" />
                 <span className="text-xl font-bold" style={{ fontFamily: 'Merriweather, serif' }}>Peace Corps</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed max-w-xs">

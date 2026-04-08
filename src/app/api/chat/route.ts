@@ -64,6 +64,24 @@ export async function POST(request: NextRequest) {
   }
 }
 
+const PEACE_CORPS_KEYWORDS = [
+  'peace corps', 'peacecorps', 'volunteer', 'serve', 'service', 'apply', 'application',
+  'eligibility', 'eligible', 'recruiter', 'countries', 'country', 'abroad', 'overseas',
+  'assignment', 'benefit', 'benefits', 'training', 'medical', 'clearance', 'staging',
+  'sector', 'education', 'health', 'agriculture', 'environment', 'youth', 'community',
+  'development', 'rpcv', 'returned', 'response', 'virtual', 'tech corps',
+  'where', 'how', 'what', 'when', 'who', 'can i', 'do i', 'am i', 'is it', 'are there',
+  'stipend', 'allowance', 'housing', 'language', 'placement', 'departure', 'timeline',
+  'couple', 'family', 'loan', 'student', 'degree', 'age', 'background check',
+  'africa', 'asia', 'caribbean', 'europe', 'pacific', 'south america', 'central america',
+  'mission', 'impact', 'program', 'opportunity', 'openings', 'position',
+];
+
+function isPeaceCorpsRelated(query: string): boolean {
+  const lower = query.toLowerCase();
+  return PEACE_CORPS_KEYWORDS.some(keyword => lower.includes(keyword));
+}
+
 function generateResponse(query: string, results: ReturnType<typeof searchKnowledgeBase>, isHIPAA: boolean, language: string): string {
   let lang = language as SupportedLanguage;
   if (lang === 'en') {
@@ -72,17 +90,24 @@ function generateResponse(query: string, results: ReturnType<typeof searchKnowle
   }
   const tr = t(lang);
 
+  // Allow greetings and thanks through without topic check
+  if (isGreeting(query, lang)) {
+    return `${tr.greeting}\n\n${tr.helpfulTopics}:\n\n- **${tr.topicApply}**\n- **${tr.topicPrograms}**\n- **${tr.topicCountries}**\n- **${tr.topicBenefits}**\n- **${tr.topicEligibility}**\n- **${tr.topicRecruiter}**\n\n${tr.whatToKnow}`;
+  }
+  if (isThanks(query, lang)) {
+    return `${tr.thanks}\n\n- **${tr.applyNow}**: [peacecorps.gov/apply](https://www.peacecorps.gov/apply)\n- **${tr.talkToRecruiter}**: [peacecorps.gov/connect/recruiter/](https://www.peacecorps.gov/connect/recruiter/)\n\n${tr.goodLuck}`;
+  }
+
+  // Topic guard: reject off-topic questions
+  if (!isPeaceCorpsRelated(query) && results.length === 0) {
+    return "I'm sorry, I can only help with Peace Corps related inquiries. Feel free to ask me about volunteering, how to apply, where you can serve, eligibility, benefits, and more!\n\nHere are some things I can help with:\n- **How to apply** to the Peace Corps\n- **Where you can serve** around the world\n- **Eligibility requirements**\n- **Benefits** of serving\n- **Connecting with a recruiter**";
+  }
+
   if (isHIPAA) {
     return `${tr.hipaaRedirect}\n\n- **${tr.talkToRecruiter}**: [peacecorps.gov/connect/recruiter/](https://www.peacecorps.gov/connect/recruiter/)\n- **Peace Corps**: 1-855-855-1961\n\n${tr.anythingElse}`;
   }
   if (results.length === 0) {
     return `${tr.noResults}\n\n- **${tr.talkToRecruiter}**: [peacecorps.gov/connect/recruiter/](https://www.peacecorps.gov/connect/recruiter/)\n- **Peace Corps**: 1-855-855-1961\n\n${tr.anythingElse}`;
-  }
-  if (isGreeting(query, lang)) {
-    return `${tr.greeting}\n\n${tr.helpfulTopics}:\n\n- **${tr.topicApply}**\n- **${tr.topicPrograms}**\n- **${tr.topicCountries}**\n- **${tr.topicBenefits}**\n- **${tr.topicEligibility}**\n- **${tr.topicRecruiter}**\n\n${tr.whatToKnow}`;
-  }
-  if (isThanks(query, lang)) {
-    return `${tr.thanks}\n\n- **${tr.applyNow}**: [peacecorps.gov/apply](https://www.peacecorps.gov/apply)\n- **${tr.talkToRecruiter}**: [peacecorps.gov/connect/recruiter/](https://www.peacecorps.gov/connect/recruiter/)\n\n${tr.goodLuck} 🌍`;
   }
 
   const topResult = results[0];
